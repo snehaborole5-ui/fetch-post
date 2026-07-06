@@ -85,7 +85,7 @@ function createProducts(arr) {
     tooltip();
 }
 
-function onsubmithandl(ele) {
+function onsubmit(ele) {
     spinner.classList.remove('d-none');
     ele.preventDefault();
 
@@ -160,10 +160,10 @@ function createNewproduct(res) {
 
 function onEdit(id) {
     spinner.classList.remove('d-none');
-    let editId = id;
-    localStorage.setItem('EditId', editId);
+    let EDIT_ID = id;
+    localStorage.setItem('EditId', EDIT_ID);
 
-    let editURl = `${BASE_URL}/realproducts/${editId}.json`;
+    let editURl = `${BASE_URL}/realproducts/${EDIT_ID}.json`;
 
     fetch(editURl, {
         method: 'GET',
@@ -200,10 +200,10 @@ function PatchData(res) {
     });
 }
 
-function onupdatehandl() {
+function onupdate() {
     spinner.classList.remove('d-none');
-    let updateId = localStorage.getItem('EditId');
-    let udpateUrl = `${BASE_URL}/realproducts/${updateId}.json`;
+    let UPDATE_ID = localStorage.getItem('EditId');
+    let UPDATE_URL = `${BASE_URL}/realproducts/${UPDATE_ID}.json`;
 
     let updateObj = {
         title: titleControl.value,
@@ -212,10 +212,10 @@ function onupdatehandl() {
         rating: ratingControl.value,
         userId: userIdControl.value,
         thumbnail: thumbnailControl.value,
-        id: updateId
+        id: UPDATE_ID
     };
 
-    fetch(udpateUrl, {
+    fetch(UPDATE_URL, {
         method: 'PUT',
         body: JSON.stringify(updateObj),
         headers: {
@@ -286,9 +286,9 @@ function onRemove(id) {
     .then((result) => {
         if (result.isConfirmed) {
             spinner.classList.remove('d-none');
-            let removeURL = `${BASE_URL}/realproducts/${removeId}.json`;
+            let REMOVE_URL = `${BASE_URL}/realproducts/${removeId}.json`;
 
-            fetch(removeURL, {
+            fetch(REMOVE_URL, {
                 method: 'DELETE',
                 headers: {
                     "Content-Type": 'application/json'
@@ -313,5 +313,5 @@ function onRemove(id) {
     });
 }
 
-productForm.addEventListener('submit', onsubmithandl);
-updateProductBtn.addEventListener('click', onupdatehandl);
+productForm.addEventListener('submit', onsubmit);
+updateProductBtn.addEventListener('click', onupdate);
