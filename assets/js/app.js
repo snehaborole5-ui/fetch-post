@@ -32,7 +32,7 @@ function tooltip() {
     });
 }
 
-// 1. Database madhun sagle products aane (Read)
+
 function fetchProducts() {
     spinner.classList.remove('d-none');
     fetch(PRODUCT_URL, {
@@ -44,7 +44,7 @@ function fetchProducts() {
     .then((res) => res.json())
     .then((data) => {
         if (data) {
-            // Firebase chya unique alpha-numeric keys la product id madhe map karne (VISHESH)
+            
             productArr = Object.keys(data).map(key => {
                 return { ...data[key], id: key };
             });
@@ -63,7 +63,7 @@ function fetchProducts() {
 
 fetchProducts();
 
-// 2. UI Var Cards Tayar Karne
+
 function createProducts(arr) {
     let result = ``;
     arr.forEach(ele => {
@@ -113,7 +113,7 @@ function onsubmithandl(ele) {
     })
     .then((res) => res.json())
     .then((data) => {
-        newProduct.id = data.name; // Firebase chi original key assignment
+        newProduct.id = data.name; 
         createNewproduct(newProduct);
     })
     .catch((err) => {
@@ -150,11 +150,11 @@ function createNewproduct(res) {
     productForm.reset();
     tooltip();
     
-    // TI EXTRA FALATICHI 'PUT' REQUEST ITHE KADHUN TAKLI AHE JYA MULE DATA NEST HOT NOTA.
+    
     snackbar(`The New Product with Id ${res.id} Is Added Successfully!!`, 'success');
 }
 
-// 4. Edit Button Click Logic (Hya mule crash thambla)
+
 function onEdit(id) {
     spinner.classList.remove('d-none');
     let editId = id;
@@ -202,7 +202,7 @@ function PatchData(res) {
     });
 }
 
-// 5. Update Button Click logic
+
 function onupdatehandl() {
     spinner.classList.remove('d-none');
     let updateId = localStorage.getItem('EditId');
@@ -226,7 +226,7 @@ function onupdatehandl() {
     })
     .then((res) => res.json())
     .then((data) => {
-        // Map native id back to targeted item for updating UI
+        
         data.id = updateId;
         UpdateonUI(data);
     })
