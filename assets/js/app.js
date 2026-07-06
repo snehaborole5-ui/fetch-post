@@ -32,6 +32,7 @@ function tooltip() {
     });
 }
 
+// 1. Database madhun sagle products aane (Read)
 function fetchProducts() {
     spinner.classList.remove('d-none');
     fetch(PRODUCT_URL, {
@@ -43,7 +44,10 @@ function fetchProducts() {
     .then((res) => res.json())
     .then((data) => {
         if (data) {
-            productArr = Object.values(data);
+            // Firebase chya unique alpha-numeric keys la product id madhe map karne (VISHESH)
+            productArr = Object.keys(data).map(key => {
+                return { ...data[key], id: key };
+            });
             createProducts(productArr.reverse());
         } else {
             productContainer.innerHTML = '';
@@ -59,6 +63,7 @@ function fetchProducts() {
 
 fetchProducts();
 
+// 2. UI Var Cards Tayar Karne
 function createProducts(arr) {
     let result = ``;
     arr.forEach(ele => {
@@ -85,15 +90,16 @@ function createProducts(arr) {
     tooltip();
 }
 
-function onsubmit(ele) {
+// 3. Form Submit (Create Product)
+function onsubmithandl(ele) {
     spinner.classList.remove('d-none');
     ele.preventDefault();
 
     let newProduct = {
         title: titleControl.value,
-        price: priceControl.value,
+        price: Number(priceControl.value),
         brand: brandControl.value,
-        rating: ratingControl.value,
+        rating: Number(ratingControl.value),
         userId: userIdControl.value,
         thumbnail: thumbnailControl.value
     };
@@ -107,7 +113,7 @@ function onsubmit(ele) {
     })
     .then((res) => res.json())
     .then((data) => {
-        newProduct.id = data.name;
+        newProduct.id = data.name; // Firebase chi original key assignment
         createNewproduct(newProduct);
     })
     .catch((err) => {
@@ -143,27 +149,18 @@ function createNewproduct(res) {
     productContainer.prepend(div);
     productForm.reset();
     tooltip();
-
-    let put_url = `${BASE_URL}/realproducts/${res.id}.json`;
-    fetch(put_url, {
-        method: 'PUT',
-        body: JSON.stringify(res),
-        headers: {
-            "Content-Type": "application/json"
-        }
-    })
-    .then((res) => res.json())
-    .catch((err) => cl(err));
-
+    
+    // TI EXTRA FALATICHI 'PUT' REQUEST ITHE KADHUN TAKLI AHE JYA MULE DATA NEST HOT NOTA.
     snackbar(`The New Product with Id ${res.id} Is Added Successfully!!`, 'success');
 }
 
+// 4. Edit Button Click Logic (Hya mule crash thambla)
 function onEdit(id) {
     spinner.classList.remove('d-none');
-    let EDIT_ID = id;
-    localStorage.setItem('EditId', EDIT_ID);
+    let editId = id;
+    localStorage.setItem('EditId', editId);
 
-    let editURl = `${BASE_URL}/realproducts/${EDIT_ID}.json`;
+    let editURl = `${BASE_URL}/realproducts/${editId}.json`;
 
     fetch(editURl, {
         method: 'GET',
@@ -173,7 +170,11 @@ function onEdit(id) {
     })
     .then((res) => res.json())
     .then((data) => {
-        PatchData(data);
+        if (data) {
+            PatchData(data);
+        } else {
+            snackbar("Product data format is wrong or empty!", "error");
+        }
     })
     .catch((err) => {
         snackbar(err.message, 'error');
@@ -184,12 +185,13 @@ function onEdit(id) {
 }
 
 function PatchData(res) {
-    titleControl.value = res.title;
-    priceControl.value = res.price;
-    brandControl.value = res.brand;
-    ratingControl.value = res.rating;
-    userIdControl.value = res.userId;
-    thumbnailControl.value = res.thumbnail;
+    titleControl.value = res.title || '';
+    priceControl.value = res.price || '';
+    brandControl.value = res.brand || '';
+    // Rating number aslyamule nehami string format madhe form control la dene safe aste
+    ratingControl.value = res.rating ? res.rating.toString() : '';
+    userIdControl.value = res.userId || '';
+    thumbnailControl.value = res.thumbnail || '';
 
     addProductBtn.classList.add('d-none');
     updateProductBtn.classList.remove('d-none');
@@ -200,22 +202,22 @@ function PatchData(res) {
     });
 }
 
-function onupdate() {
+// 5. Update Button Click logic
+function onupdatehandl() {
     spinner.classList.remove('d-none');
-    let UPDATE_ID = localStorage.getItem('EditId');
-    let UPDATE_URL = `${BASE_URL}/realproducts/${UPDATE_ID}.json`;
+    let updateId = localStorage.getItem('EditId');
+    let udpateUrl = `${BASE_URL}/realproducts/${updateId}.json`;
 
     let updateObj = {
         title: titleControl.value,
-        price: priceControl.value,
+        price: Number(priceControl.value),
         brand: brandControl.value,
-        rating: ratingControl.value,
+        rating: Number(ratingControl.value),
         userId: userIdControl.value,
-        thumbnail: thumbnailControl.value,
-        id: UPDATE_ID
+        thumbnail: thumbnailControl.value
     };
 
-    fetch(UPDATE_URL, {
+    fetch(udpateUrl, {
         method: 'PUT',
         body: JSON.stringify(updateObj),
         headers: {
@@ -224,6 +226,8 @@ function onupdate() {
     })
     .then((res) => res.json())
     .then((data) => {
+        // Map native id back to targeted item for updating UI
+        data.id = updateId;
         UpdateonUI(data);
     })
     .catch((err) => {
@@ -270,6 +274,7 @@ function UpdateonUI(res) {
     }, 4000);
 }
 
+// 6. Delete Action
 function onRemove(id) {
     let removeId = id;
     localStorage.setItem('RemoveId', removeId);
@@ -286,9 +291,9 @@ function onRemove(id) {
     .then((result) => {
         if (result.isConfirmed) {
             spinner.classList.remove('d-none');
-            let REMOVE_URL = `${BASE_URL}/realproducts/${removeId}.json`;
+            let removeURL = `${BASE_URL}/realproducts/${removeId}.json`;
 
-            fetch(REMOVE_URL, {
+            fetch(removeURL, {
                 method: 'DELETE',
                 headers: {
                     "Content-Type": 'application/json'
@@ -313,5 +318,5 @@ function onRemove(id) {
     });
 }
 
-productForm.addEventListener('submit', onsubmit);
-updateProductBtn.addEventListener('click', onupdate);
+productForm.addEventListener('submit', onsubmithandl);
+updateProductBtn.addEventListener('click', onupdatehandl);
